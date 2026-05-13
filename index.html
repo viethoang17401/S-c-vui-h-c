@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sóc Vui Học - Học tập mỗi ngày</title>
+    <link rel="stylesheet" href="/src/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="light-theme">
+    <div id="app">
+      <!-- Welcome/Landing Screen -->
+      <section id="welcome-screen" class="screen active">
+        <header class="landing-header">
+          <div class="top-bar">
+            <div class="container">
+              <div class="contact-info">
+                <span>📧 support@socvuihoc.vn</span>
+                <span>📱 1900 636 111</span>
+              </div>
+              <div class="top-auth">
+                <button class="btn-top-auth" onclick="switchToScreen('auth-screen')">Đăng nhập</button>
+                <button class="btn-top-auth primary" onclick="switchToScreen('auth-screen')">Đăng ký</button>
+              </div>
+            </div>
+          </div>
+          <nav class="main-nav">
+            <div class="container">
+              <div class="logo">🐿️ <span>SócVuiHọc</span></div>
+              <ul class="nav-links">
+                <li><a href="#" class="active">Vào học</a></li>
+                <li><a href="#">Đổi quà</a></li>
+                <li><a href="#">Thách đấu</a></li>
+                <li><a href="#">Tin tức</a></li>
+              </ul>
+            </div>
+          </nav>
+        </header>
+
+        <div class="landing-container">
+          <div class="landing-content">
+            <h1 class="hero-title">Nền tảng tự học <br>trực tuyến với <span class="highlight">AI</span></h1>
+            <p class="hero-desc">Được thiết kế chuyên sâu cho chương trình Toán và Tiếng Anh lớp 1-9, giúp bé làm chủ kiến thức vững vàng.</p>
+            <div class="landing-actions">
+              <button onclick="switchToScreen('auth-screen')" class="btn-hero-primary">Học thử ngay</button>
+              <button class="btn-hero-link"><span>▶</span> Giới thiệu về Sóc Vui Học</button>
+            </div>
+          </div>
+          <div class="mascot-hero">
+            <div class="hero-bg-shapes"></div>
+            <div class="mascot-large">🐿️</div>
+            <div class="hero-floating-icons">
+              <div class="icon-item trophy">🏆</div>
+              <div class="icon-item book">📚</div>
+              <div class="icon-item pencil">✏️</div>
+              <div class="icon-item coin">🪙</div>
+            </div>
+          </div>
+        </div>
+        <div class="wave-transition"></div>
+      </section>
+
+      <!-- Auth Screen -->
+      <section id="auth-screen" class="screen">
+        <div class="auth-container">
+          <div class="logo">
+            <span class="mascot-placeholder">🐿️</span>
+            <h1>Sóc Vui Học</h1>
+          </div>
+          <!-- Forms remain same but show/hide logic handled in JS -->
+          <div id="login-form" class="auth-form">
+            <h2>Chào mừng bạn quay lại!</h2>
+            <div class="input-group">
+              <label for="email">Tài khoản (Email)</label>
+              <input type="text" id="email" placeholder="Nhập email hoặc tài khoản">
+            </div>
+            <div class="input-group">
+              <label for="password">Mật khẩu</label>
+              <input type="password" id="password" placeholder="••••••••">
+            </div>
+            <button id="btn-login" class="btn-primary">Đăng nhập</button>
+            <div style="margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 15px; text-align: center;">
+              <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; font-weight: 500;">Bạn đã có mã sao lưu từ máy khác?</p>
+              <button id="btn-login-sync" class="btn-secondary" style="width: 100%; padding: 12px; font-size: 0.9rem;">🔄 Đồng bộ dữ liệu cũ</button>
+            </div>
+            <p class="switch-auth">Chưa có tài khoản? <a href="#" id="go-to-register">Đăng ký ngay</a></p>
+          </div>
+
+          <div id="register-form" class="auth-form" style="display: none;">
+            <h2>Tạo tài khoản mới</h2>
+            <div class="grid-form">
+              <div class="input-group">
+                <label for="reg-name">Tên hiển thị</label>
+                <input type="text" id="reg-name" placeholder="Ví dụ: Sóc Nhỏ">
+              </div>
+              <div class="input-group">
+                <label for="reg-full-name">Tên thật</label>
+                <input type="text" id="reg-full-name" placeholder="Ví dụ: Nguyễn Văn A">
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="reg-email">Email</label>
+              <input type="email" id="reg-email" placeholder="email@vi-du.com">
+            </div>
+            <div class="grid-form">
+              <div class="input-group">
+                <label for="reg-password">Mật khẩu</label>
+                <input type="password" id="reg-password" placeholder="••••••••">
+              </div>
+              <div class="input-group">
+                <label for="reg-confirm-password">Nhập lại mật khẩu</label>
+                <input type="password" id="reg-confirm-password" placeholder="••••••••">
+              </div>
+            </div>
+            <div class="grid-form">
+              <div class="input-group">
+                <label for="reg-grade">Khối đang học</label>
+                <select id="reg-grade" class="custom-select">
+                  <option value="1">Lớp 1</option>
+                  <option value="2">Lớp 2</option>
+                  <option value="3">Lớp 3</option>
+                  <option value="4">Lớp 4</option>
+                  <option value="5">Lớp 5</option>
+                  <option value="6">Lớp 6</option>
+                  <option value="7">Lớp 7</option>
+                  <option value="8">Lớp 8</option>
+                  <option value="9">Lớp 9</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="reg-location">Địa phương</label>
+                <input type="text" id="reg-location" placeholder="Hà Nội, TP.HCM...">
+              </div>
+            </div>
+            <button id="btn-register" class="btn-primary">Đăng ký thành viên</button>
+            <p class="switch-auth">Đã có tài khoản? <a href="#" id="go-to-login">Đăng nhập ngay</a></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grade Selection Screen -->
+      <section id="grade-selection-screen" class="screen">
+        <div class="auth-container">
+          <div class="logo">
+            <span class="mascot-placeholder">🐿️</span>
+            <h1>Chọn khối lớp</h1>
+            <p>Chào mừng bạn! Hãy chọn lớp để bắt đầu học nhé.</p>
+          </div>
+          <div class="grade-grid" id="grade-container">
+            <!-- Grades 1-9 injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Screen -->
+      <section id="dashboard-screen" class="screen">
+        <header class="main-header">
+          <div class="header-left">
+            <span class="mascot-mini">🐿️</span>
+            <span class="user-name-display" id="btn-go-profile-top" style="cursor:pointer">Chào, <span id="display-user">Bạn</span>!</span>
+          </div>
+          <div class="header-right">
+            <div class="notifications-bell" id="btn-notifications">
+              <span>🔔</span>
+              <span class="noti-badge" id="noti-count">2</span>
+              <div id="noti-dropdown" class="noti-dropdown">
+                <div class="noti-header">Thông báo</div>
+                <div id="noti-list" class="noti-list">
+                  <div class="noti-item">Chào mừng bạn mới! Nhận 50 xu quà tặng ngay.</div>
+                  <div class="noti-item">Sóc Ham Học đang chờ bạn ở góc màn hình đó!</div>
+                </div>
+              </div>
+            </div>
+            <div class="user-stats">
+              <div class="stat-item missions" id="btn-show-missions" title="Nhiệm vụ">
+                <span>📋</span> <span id="mission-count">0/3</span>
+              </div>
+              <div class="stat-item streak" title="Chuỗi ngày học">
+                <span>🔥</span> <span id="streak-count">0</span>
+              </div>
+              <div class="stat-item coins" title="Số xu tích lũy">
+                <span>🪙</span> <span id="coin-count">0</span>
+              </div>
+            </div>
+            <div class="badge grade-badge" id="btn-change-grade-dash" style="cursor: pointer;">
+              🎓 <span id="current-grade-display">Lớp ?</span>
+            </div>
+            <div class="xp-container" style="display: flex; gap: 8px;">
+               <div class="badge xp-badge">✨ <span id="user-xp">0</span></div>
+               <div class="badge level-badge">Lv. <span id="user-level">1</span></div>
+            </div>
+            <button id="btn-toggle-theme" class="btn-icon" title="Đổi giao diện">🌓</button>
+            <button id="btn-logout" class="btn-icon" title="Đăng xuất">🚪</button>
+          </div>
+        </header>
+
+        <div class="dashboard-layout">
+          <aside class="sidebar-nav">
+            <button class="nav-item active" id="nav-home">
+              <span class="icon">🏠</span> 
+              <span class="label">Trang chủ</span>
+            </button>
+            <button class="nav-item" id="nav-roadmap">
+              <span class="icon">🗺️</span> 
+              <span class="label">Lộ trình</span>
+            </button>
+            <button class="nav-item" id="nav-games">
+              <span class="icon">🎮</span> 
+              <span class="label">Trò chơi</span>
+            </button>
+            <button class="nav-item" id="nav-stats">
+              <span class="icon">📊</span> 
+              <span class="label">Thống kê</span>
+            </button>
+            <button class="nav-item" id="nav-leaderboard">
+              <span class="icon">🏆</span> 
+              <span class="label">Xếp hạng</span>
+            </button>
+            <button class="nav-item" id="nav-store">
+              <span class="icon">🎁</span> 
+              <span class="label">Đổi quà</span>
+            </button>
+            <button class="nav-item" id="nav-friends">
+              <span class="icon">👥</span> 
+              <span class="label">Bạn bè</span>
+            </button>
+            <button class="nav-item" id="nav-profile">
+              <span class="icon">👤</span> 
+              <span class="label">Cá nhân</span>
+            </button>
+          </aside>
+
+          <main class="content-area">
+            <div class="dashboard-grid">
+              <div class="main-column">
+                <div class="dashboard-banner">
+                  <div class="banner-text">
+                    <h2>Gia tốc tư duy<br><span class="banner-highlight">Làm chủ bài học</span></h2>
+                    <p>Học tập thông minh cùng trợ lý Sóc 🐿️</p>
+                    <button id="roadmap-trigger" class="btn-banner-action">Mở lộ trình 🗺️</button>
+                  </div>
+                  <div class="banner-mascot">🐿️</div>
+                </div>
+
+                <div class="section-title">
+                  <h2>Chương trình học tập Tập trung</h2>
+                </div>
+                <div class="subject-grid">
+                  <div class="subject-card math" data-subject="math">
+                    <div class="card-icon">🔢</div>
+                    <div class="card-content">
+                      <h3>Toán học</h3>
+                      <p>Logic và con số</p>
+                      <div class="subject-meta">Lớp 1-9 • Cơ bản to Nâng cao</div>
+                    </div>
+                  </div>
+                  <div class="subject-card english" data-subject="english">
+                    <div class="card-icon">🔤</div>
+                    <div class="card-content">
+                      <h3>Tiếng Anh</h3>
+                      <p>Ngôn ngữ toàn cầu</p>
+                      <div class="subject-meta">Giao tiếp • Ngữ pháp • Từ vựng</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="widgets-column">
+                <div class="widget challenge-widget">
+                  <h3>Thử thách ngày ⚡</h3>
+                  <div id="daily-challenges-list">
+                    <div class="challenge-item">
+                      <p>Hoàn thành 3 bài toán</p>
+                      <div class="progress-bar-mini"><div class="progress" style="width: 30%"></div></div>
+                    </div>
+                  </div>
+                  <button class="btn-widget-action" id="btn-do-challenge">Làm ngay</button>
+                </div>
+
+                <div class="widget rankings-widget">
+                  <div class="widget-header">
+                    <h3>Top học siêu 🏆</h3>
+                    <button class="btn-text-link" id="view-leaderboard-link">Xem hết</button>
+                  </div>
+                  <div class="mini-rank-list">
+                    <div class="rank-item">
+                      <span class="num">1</span>
+                      <span class="name">Sóc Siêu Nhân</span>
+                      <span class="val">2.5k XP</span>
+                    </div>
+                    <div class="rank-item">
+                      <span class="num">2</span>
+                      <span class="name">Gấu Trúc</span>
+                      <span class="val">2.1k XP</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="widget badges-widget">
+                  <h3>Danh hiệu 🏅</h3>
+                  <div class="badge-mini-grid" id="mini-badges">
+                    <div class="badge-item-mini locked" title="Học giả: Học 7 ngày liên tiếp">🔥</div>
+                    <div class="badge-item-mini locked" title="Siêu Toán: Đạt 100 điểm">🔢</div>
+                    <div class="badge-item-mini locked" title="Thợ săn: Mở 5 chủ đề">🗺️</div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </main>
+        </div>
+      </section>
+
+      <!-- Leaderboard Screen -->
+      <section id="leaderboard-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Bảng Xếp Hạng</h2>
+        </header>
+        <div class="leaderboard-container">
+          <div class="lb-tabs">
+            <button class="lb-tab active">Tuần này</button>
+            <button class="lb-tab">Tháng này</button>
+          </div>
+          <div class="lb-list" id="leaderboard-list">
+            <!-- Table will be populated here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Store Screen -->
+      <section id="store-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Cửa hàng quà tặng</h2>
+          <div class="store-balance">🪙 <span id="store-coin-total">0</span> xu</div>
+        </header>
+        <div class="store-container">
+          <div class="store-tabs">
+            <button class="store-tab active" id="tab-buy">Cửa hàng</button>
+            <button class="store-tab" id="tab-inventory">Kho của tôi</button>
+          </div>
+
+          <div id="store-buy-view" class="store-content-view active">
+            <div class="store-grid" id="store-items-grid">
+              <!-- Items like Avatars, Badges, themes -->
+            </div>
+          </div>
+
+          <div id="store-inventory-view" class="store-content-view">
+            <div class="inventory-grid" id="inventory-grid">
+              <!-- Owned items will appear here -->
+              <div class="empty-inventory">Bạn chưa có vật phẩm nào. Hãy học chăm chỉ để đổi quà nhé!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Roadmaps... (rest of the screens) -->
+      
+      <!-- Games Screen -->
+      <section id="games-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Vừa học vừa chơi</h2>
+        </header>
+        <div class="games-container">
+          <div class="games-grid">
+            <div class="game-card">
+              <div class="game-visual">🧮</div>
+              <h3>Tính nhẩm nhanh</h3>
+              <p>Thử thách tốc độ với các phép tính</p>
+              <button class="btn-primary" id="btn-play-math-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">📖</div>
+              <h3>Nối chữ Tiếng Anh</h3>
+              <p>Mở rộng vốn từ vựng qua hình ảnh</p>
+              <button class="btn-primary" id="btn-play-english-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">⚖️</div>
+              <h3>So sánh số</h3>
+              <p>Chọn dấu &gt; &lt; = chính xác nhất</p>
+              <button class="btn-primary" id="btn-play-compare-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🔍</div>
+              <h3>Truy tìm số ẩn</h3>
+              <p>Điền số còn thiếu vào chỗ trống</p>
+              <button class="btn-primary" id="btn-play-missing-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">✖️</div>
+              <h3>Bảng cửu chương</h3>
+              <p>Thử thách siêu tốc cùng phép nhân</p>
+              <button class="btn-primary" id="btn-play-multi-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">↔️</div>
+              <h3>Cặp từ trái nghĩa</h3>
+              <p>Tìm từ đối lập trong Tiếng Anh</p>
+              <button class="btn-primary" id="btn-play-antonym-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">✍️</div>
+              <h3>Điền vào chỗ trống</h3>
+              <p>Hoàn thành câu văn Tiếng Anh</p>
+              <button class="btn-primary" id="btn-play-fill-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">✅</div>
+              <h3>Đúng chính tả</h3>
+              <p>Kiểm tra cách viết từ vựng</p>
+              <button class="btn-primary" id="btn-play-spelling-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">📝</div>
+              <h3>Xếp chữ nhanh</h3>
+              <p>Sắp xếp các chữ cái thành từ đúng</p>
+              <button class="btn-primary" id="btn-play-scramble-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">💡</div>
+              <h3>Đố vui kiến thức</h3>
+              <p>Thử thách kiến thức tổng hợp</p>
+              <button class="btn-primary" id="btn-play-trivia-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🍰</div>
+              <h3>Phân số kì thú</h3>
+              <p>Khám phá thế giới phân số</p>
+              <button class="btn-primary" id="btn-play-fraction-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">📐</div>
+              <h3>Hình học vui nhộn</h3>
+              <p>Làm quen các hình khối & diện tích</p>
+              <button class="btn-primary" id="btn-play-geometry-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🔢</div>
+              <h3>Dãy số logic</h3>
+              <p>Tìm quy luật các con số</p>
+              <button class="btn-primary" id="btn-play-sequence-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🗂️</div>
+              <h3>Phân loại từ vựng</h3>
+              <p>Sắp xếp từ vào đúng nhóm</p>
+              <button class="btn-primary" id="btn-play-sort-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🌟</div>
+              <h3>Ngôi sao đồng nghĩa</h3>
+              <p>Tìm từ cùng ý nghĩa</p>
+              <button class="btn-primary" id="btn-play-synonym-game">Chơi ngay</button>
+            </div>
+            <div class="game-card">
+              <div class="game-visual">🔀</div>
+              <h3>Sắp xếp câu</h3>
+              <p>Hoàn thành câu Tiếng Anh chuẩn</p>
+              <button class="btn-primary" id="btn-play-sentence-game">Chơi ngay</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scramble Game Screen -->
+      <section id="scramble-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-score">⭐ <span id="scramble-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="scramble-word-container">
+            <div class="scramble-hint" id="scramble-hint">Gợi ý: Con vật hay sủa</div>
+            <div class="scrambled-letters" id="scrambled-letters-box">
+              <!-- Letters as buttons -->
+            </div>
+            <div class="scramble-input" id="scramble-input-box">
+              <!-- Result answer -->
+            </div>
+            <button class="btn-primary" id="btn-clear-scramble">Xóa</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trivia Game Screen -->
+      <section id="trivia-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-score">⭐ <span id="trivia-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="trivia-question-card">
+            <div class="trivia-category" id="trivia-category">Toán học</div>
+            <h2 id="trivia-question-text">1 + 1 bằng mấy?</h2>
+          </div>
+          <div class="trivia-options-grid" id="trivia-options">
+            <!-- Options -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Generic Simple Options Game Screen (Reused for Comparison, Antonyms, Spelling) -->
+      <section id="generic-options-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-score">⭐ <span id="generic-options-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="question-display-box" id="generic-question-display">
+            <!-- Question text or elements -->
+          </div>
+          <div class="options-grid-container" id="generic-options-grid">
+            <!-- Options -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Generic Input/Missing Value Game Screen (Reused for Missing Number, Multi, Fill) -->
+      <section id="generic-input-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-score">⭐ <span id="generic-input-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="question-display-box" id="generic-input-question-display">
+            <!-- Question -->
+          </div>
+          <div class="input-options-container" id="generic-input-options">
+            <!-- Number pad or word options -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Memory Game Screen -->
+      <section id="memory-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-timer">⏱️ <span id="memory-timer">45</span>s</div>
+            <div class="game-score">⭐ <span id="memory-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="memory-grid" id="memory-grid">
+            <!-- Cards will be generated here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Avatar Selector Modal -->
+      <div id="avatar-modal" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Chọn Avatar của bạn</h3>
+            <button class="btn-close-modal" id="btn-close-avatar-modal">×</button>
+          </div>
+          <div class="avatar-selection-grid" id="avatar-selection-grid">
+            <!-- Owned avatars go here -->
+          </div>
+          <p class="hint-text">Bạn có thể mua thêm Avatar trong Cửa hàng 🛍️</p>
+        </div>
+      </div>
+      <div id="missions-modal" class="modal-overlay">
+        <div class="modal-content missions-modal">
+          <div class="modal-header">
+            <h3>Nhiệm vụ hàng ngày</h3>
+            <button class="btn-close-modal">×</button>
+          </div>
+          <div class="missions-list" id="missions-list">
+            <!-- Missions like: Play 2 math games, Complete 1 lesson -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Math Quick Calculation Game -->
+      <section id="math-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-timer">⏱️ <span id="math-timer">30</span>s</div>
+            <div class="game-score">⭐ <span id="math-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="math-problem" id="math-problem-display">15 + 7 = ?</div>
+          <div class="math-input-grid">
+            <button class="math-opt">18</button>
+            <button class="math-opt">22</button>
+            <button class="math-opt">20</button>
+            <button class="math-opt">25</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- English Vocabulary Game -->
+      <section id="english-game-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Thoát</button>
+          <div class="game-stats-top">
+            <div class="game-score">⭐ <span id="english-score">0</span></div>
+          </div>
+        </header>
+        <div class="game-play-area">
+          <div class="english-word-card">
+            <div class="word-visual" id="eng-word-visual">🍎</div>
+            <h2 id="eng-word-text">Apple</h2>
+          </div>
+          <p class="game-instruction">Chọn nghĩa đúng của từ trên:</p>
+          <div class="english-options-grid" id="eng-options">
+            <button class="eng-opt">Quả táo</button>
+            <button class="eng-opt">Quả cam</button>
+            <button class="eng-opt">Cái bàn</button>
+            <button class="eng-opt">Quyển sách</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Screen -->
+      <section id="stats-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Tiến độ học tập</h2>
+        </header>
+        <div class="stats-container">
+          <div class="stats-overview">
+            <div class="stat-box">
+              <span class="stat-val" id="stats-total-lessons">0</span>
+              <span class="stat-label">Bài học đã xong</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-val" id="stats-current-streak">0</span>
+              <span class="stat-label">Ngày liên tiếp</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-val" id="stats-avg-score">0%</span>
+              <span class="stat-label">Điểm trung bình</span>
+            </div>
+          </div>
+          <div class="stats-charts">
+            <div class="chart-mock">
+              <h3>Hoạt động 7 ngày qua</h3>
+              <!-- Simple CSS representation of a chart -->
+              <div class="bar-chart">
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar" style="height: 30%"></div>
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 90%"></div>
+                <div class="bar" style="height: 75%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Roadmap Screen -->
+      <section id="roadmap-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Bản đồ học tập</h2>
+        </header>
+        <div class="roadmap-container" id="roadmap-path">
+          <!-- Roadmap milestones injected by JS -->
+        </div>
+      </section>
+
+      <!-- Profile Screen -->
+      <section id="profile-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Trang cá nhân</h2>
+        </header>
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar-wrapper" id="btn-change-avatar-profile" title="Nhấn để đổi hình đại diện">
+              <div class="profile-avatar" id="profile-avatar-display">🐿️</div>
+              <div class="avatar-edit-icon">🔄</div>
+            </div>
+            <div class="profile-info">
+              <h2 id="profile-name">Tên người dùng</h2>
+              <p id="profile-email">email@vi-du.com</p>
+              <button class="btn-primary btn-sm" id="btn-edit-profile-name">Đổi tên</button>
+            </div>
+          </div>
+          <div class="profile-stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" id="profile-xp">0</div>
+              <div class="stat-label">Tổng XP</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="profile-level">1</div>
+              <div class="stat-label">Cấp độ</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="profile-grade">1</div>
+              <div class="stat-label">Khối lớp</div>
+            </div>
+          </div>
+
+          <div class="data-management-section">
+            <h3 style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">🔄 Đồng bộ thiết bị</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Dùng mã này để chuyển dữ liệu của bạn sang máy khác.</p>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <button class="btn-secondary btn-sm" id="btn-export-data" style="flex: 1;">Lấy mã sao lưu</button>
+              <button class="btn-primary btn-sm" id="btn-import-data" style="flex: 1;">Nhập mã</button>
+            </div>
+            <div id="backup-code-container" style="display:none; background: #f1f5f9; padding: 12px; border-radius: 8px; margin-top: 10px;">
+              <p style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Mã sao lưu của bạn:</p>
+              <textarea id="backup-code-text" readonly style="width: 100%; height: 60px; font-family: monospace; font-size: 0.75rem; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; margin-bottom: 8px;"></textarea>
+              <button class="btn-primary btn-sm" id="btn-copy-code" style="width: 100%;">Sao chép mã</button>
+            </div>
+          </div>
+          <div class="achievement-section">
+            <h3>Thành tích</h3>
+            <div class="achievement-list" id="achievement-container">
+              <div class="achievement-item locked">
+                <span>🏅</span> Mới bắt đầu
+              </div>
+              <div class="achievement-item locked">
+                <span>🔥</span> Học tập chăm chỉ
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Friends Screen -->
+      <section id="friends-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Bạn bè</h2>
+        </header>
+        <div class="friends-container">
+          <div class="social-search-section">
+            <div class="search-bar">
+              <input type="text" id="friend-search-input" placeholder="Tìm tên hoặc email bạn bè...">
+              <button id="btn-do-search" class="btn-primary">Tìm kiếm</button>
+            </div>
+            <div id="search-results-area" class="search-results-list" style="display: none;">
+              <!-- Search results will appear here -->
+            </div>
+          </div>
+
+          <div class="friends-list-section">
+            <h3>Danh sách bạn bè</h3>
+            <div id="friends-list-render" class="friends-grid">
+              <!-- Friends list will appear here -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Topic Selection Screen -->
+      <section id="topics-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2 id="current-subject-title">Môn học</h2>
+        </header>
+        <div class="topic-list" id="topic-container">
+          <!-- Topics injected by JS -->
+        </div>
+      </section>
+
+      <!-- Lesson Selection Screen -->
+      <section id="lessons-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2 id="current-topic-title">Chủ đề</h2>
+        </header>
+        <div class="lesson-grid" id="lesson-container">
+          <!-- Lessons injected by JS -->
+        </div>
+      </section>
+
+      <!-- Quiz Screen -->
+      <section id="quiz-screen" class="screen">
+        <header class="quiz-header">
+          <button id="btn-exit-quiz">✕</button>
+          <div class="quiz-progress-container">
+            <div id="quiz-progress-fill" style="width: 0%"></div>
+          </div>
+          <span id="quiz-counter">1/20</span>
+        </header>
+        <div class="quiz-body">
+          <div id="question-text" class="question-box"></div>
+          <div id="options-container" class="options-grid">
+            <!-- Options injected by JS -->
+          </div>
+        </div>
+        <div id="quiz-footer" class="quiz-footer">
+          <button id="btn-next-question" class="btn-primary" disabled>Tiếp tục</button>
+        </div>
+      </section>
+
+      <!-- Result Screen -->
+      <section id="result-screen" class="screen">
+        <div class="result-container">
+          <div class="completion-icon">🏆</div>
+          <h2>Tuyệt vời!</h2>
+          <p>Bạn đã hoàn thành bài học.</p>
+          <div class="score-summary">
+            <div class="score-item">
+              <span class="label">Tổng XP nhận được:</span>
+              <span class="value" id="earned-xp">+20</span>
+            </div>
+          </div>
+          <button id="btn-back-home" class="btn-primary">Về trang chủ</button>
+        </div>
+      </section>
+
+      <!-- Mascot -->
+      <div id="mascot-container" class="mascot-floating">
+        <div class="mascot-bubble" id="mascot-speech">Cùng bắt đầu học nào!</div>
+        <div class="mascot-image-wrapper">
+          <span class="mascot-emoji">🐿️</span>
+        </div>
+      </div>
+
+      <!-- AI Assistant Chat Modal -->
+      <div id="ai-chat-modal" class="ai-chat-modal">
+        <div class="chat-header">
+          <div class="chat-title">
+            <span class="chat-icon">🐿️</span>
+            <div>
+              <strong>Sóc Ham Học</strong>
+              <small>Trợ lý học tập thông minh</small>
+            </div>
+          </div>
+          <button id="btn-close-chat" class="btn-close-chat">✕</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+          <div class="message system">
+            Chào bạn! Mình là Sóc Ham Học. Mình có thể giúp bạn giải đáp mọi thắc mắc về môn Toán và Tiếng Anh. Hãy cứ hỏi mình nhé!
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <textarea id="chat-input" placeholder="Hỏi Sóc Ham Học về Toán hoặc Tiếng Anh..." rows="1"></textarea>
+          <button id="btn-send-chat" class="btn-send-chat">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Sync Modal -->
+    <div id="sync-modal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header">
+          <h3>🔄 Đồng bộ dữ liệu</h3>
+          <button class="btn-close-modal" id="btn-close-sync-modal">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+          <p style="margin-bottom: 15px; font-size: 0.95rem; color: #475569;">Dán mã sao lưu bạn đã lấy từ máy khác vào ô bên dưới:</p>
+          <textarea id="import-code-input" placeholder="Dán mã tại đây..." style="width: 100%; height: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 0.85rem; margin-bottom: 15px; resize: none;"></textarea>
+          <button id="btn-confirm-sync" class="btn-primary" style="width: 100%;">Tiến hành đồng bộ</button>
+        </div>
+      </div>
+    </div>
+    <!-- Study Reminder Toast -->
+    <div id="study-reminder" class="reminder-toast">
+      <div class="mascot-mini">🐿️</div>
+      <div class="text-content">
+        <h4>Lời nhắc từ Sóc</h4>
+        <p id="reminder-msg">Đã đến lúc học bài rồi bạn ơi! 📚</p>
+      </div>
+      <button class="btn-close-reminder" id="btn-hide-reminder">✕</button>
+    </div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
+
