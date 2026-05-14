@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/src/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   </head>
   <body class="light-theme">
     <div id="app">
@@ -28,7 +28,7 @@
           </div>
           <nav class="main-nav">
             <div class="container">
-              <div class="logo">🐿️ <span>SócVuiHọc</span></div>
+              <div class="logo"><img src="/mascot.png" alt="Mascot" class="logo-mascot"> <span>SócVuiHọc</span></div>
               <ul class="nav-links">
                 <li><a href="#" class="active">Vào học</a></li>
                 <li><a href="#">Đổi quà</a></li>
@@ -50,7 +50,7 @@
           </div>
           <div class="mascot-hero">
             <div class="hero-bg-shapes"></div>
-            <div class="mascot-large">🐿️</div>
+            <img src="/mascot.png" alt="Sóc Mascot" class="mascot-large">
             <div class="hero-floating-icons">
               <div class="icon-item trophy">🏆</div>
               <div class="icon-item book">📚</div>
@@ -66,7 +66,7 @@
       <section id="auth-screen" class="screen">
         <div class="auth-container">
           <div class="logo">
-            <span class="mascot-placeholder">🐿️</span>
+            <img src="/mascot.png" alt="Mascot" class="mascot-placeholder">
             <h1>Sóc Vui Học</h1>
           </div>
           <!-- Forms remain same but show/hide logic handled in JS -->
@@ -144,7 +144,7 @@
       <section id="grade-selection-screen" class="screen">
         <div class="auth-container">
           <div class="logo">
-            <span class="mascot-placeholder">🐿️</span>
+            <img src="/mascot.png" alt="Mascot" class="mascot-placeholder">
             <h1>Chọn khối lớp</h1>
             <p>Chào mừng bạn! Hãy chọn lớp để bắt đầu học nhé.</p>
           </div>
@@ -158,7 +158,9 @@
       <section id="dashboard-screen" class="screen">
         <header class="main-header">
           <div class="header-left">
-            <span class="mascot-mini">🐿️</span>
+            <div class="mascot-mini">
+              <img src="/mascot.png" alt="Mascot">
+            </div>
             <span class="user-name-display" id="btn-go-profile-top" style="cursor:pointer">Chào, <span id="display-user">Bạn</span>!</span>
           </div>
           <div class="header-right">
@@ -198,38 +200,13 @@
 
         <div class="dashboard-layout">
           <aside class="sidebar-nav">
-            <button class="nav-item active" id="nav-home">
-              <span class="icon">🏠</span> 
-              <span class="label">Trang chủ</span>
-            </button>
-            <button class="nav-item" id="nav-roadmap">
-              <span class="icon">🗺️</span> 
-              <span class="label">Lộ trình</span>
-            </button>
-            <button class="nav-item" id="nav-games">
-              <span class="icon">🎮</span> 
-              <span class="label">Trò chơi</span>
-            </button>
-            <button class="nav-item" id="nav-stats">
-              <span class="icon">📊</span> 
-              <span class="label">Thống kê</span>
-            </button>
-            <button class="nav-item" id="nav-leaderboard">
-              <span class="icon">🏆</span> 
-              <span class="label">Xếp hạng</span>
-            </button>
-            <button class="nav-item" id="nav-store">
-              <span class="icon">🎁</span> 
-              <span class="label">Đổi quà</span>
-            </button>
-            <button class="nav-item" id="nav-friends">
-              <span class="icon">👥</span> 
-              <span class="label">Bạn bè</span>
-            </button>
-            <button class="nav-item" id="nav-profile">
-              <span class="icon">👤</span> 
-              <span class="label">Cá nhân</span>
-            </button>
+            <!-- Dynamic menu items will be rendered here -->
+            <div class="sidebar-footer">
+              <button class="nav-item" id="nav-all-hub">
+                <span class="icon">🌀</span> 
+                <span class="label">Tất cả</span>
+              </button>
+            </div>
           </aside>
 
           <main class="content-area">
@@ -238,10 +215,12 @@
                 <div class="dashboard-banner">
                   <div class="banner-text">
                     <h2>Gia tốc tư duy<br><span class="banner-highlight">Làm chủ bài học</span></h2>
-                    <p>Học tập thông minh cùng trợ lý Sóc 🐿️</p>
+                    <p>Học tập thông minh cùng trợ lý Sóc</p>
                     <button id="roadmap-trigger" class="btn-banner-action">Mở lộ trình 🗺️</button>
                   </div>
-                  <div class="banner-mascot">🐿️</div>
+                  <div class="banner-mascot">
+                    <img src="/mascot.png" alt="Mascot">
+                  </div>
                 </div>
 
                 <div class="section-title">
@@ -577,7 +556,7 @@
         <div class="modal-content missions-modal">
           <div class="modal-header">
             <h3>Nhiệm vụ hàng ngày</h3>
-            <button class="btn-close-modal">×</button>
+            <button class="btn-close-modal" id="btn-close-missions-modal">×</button>
           </div>
           <div class="missions-list" id="missions-list">
             <!-- Missions like: Play 2 math games, Complete 1 lesson -->
@@ -766,6 +745,11 @@
 
       <!-- Topic Selection Screen -->
       <section id="topics-screen" class="screen">
+        <div class="adventure-decor">
+          <div class="decor-item grass">🌱</div>
+          <div class="decor-item tree">🌳</div>
+          <div class="decor-item bird">🐦</div>
+        </div>
         <header class="sub-header">
           <button class="btn-back">← Quay lại</button>
           <h2 id="current-subject-title">Môn học</h2>
@@ -777,6 +761,11 @@
 
       <!-- Lesson Selection Screen -->
       <section id="lessons-screen" class="screen">
+        <div class="adventure-decor">
+          <div class="decor-item grass">🌿</div>
+          <div class="decor-item tree">🌲</div>
+          <div class="decor-item bird" style="top: 20%; left: 70%;">🐦</div>
+        </div>
         <header class="sub-header">
           <button class="btn-back">← Quay lại</button>
           <h2 id="current-topic-title">Chủ đề</h2>
@@ -796,13 +785,104 @@
           <span id="quiz-counter">1/20</span>
         </header>
         <div class="quiz-body">
-          <div id="question-text" class="question-box"></div>
+          <div class="question-header-meta">
+             <span id="question-category-tag" class="category-tag">Lý thuyết</span>
+             <span id="quiz-points-counter" class="quiz-pts">0/20 điểm</span>
+          </div>
+          <div id="question-text" class="question-box">Câu hỏi đang tải...</div>
+          
           <div id="options-container" class="options-grid">
             <!-- Options injected by JS -->
+          </div>
+
+          <div id="text-input-container" class="text-input-area" style="display:none;">
+            <input type="text" id="quiz-text-answer" placeholder="Nhập câu trả lời..." autocomplete="off">
+            <button id="btn-submit-text-answer" class="btn-primary">Gửi đáp án</button>
+          </div>
+
+          <div class="quiz-helper-area">
+             <button id="btn-ask-ai-explanation" class="btn-ai-helper" style="display:none;">
+               <span class="icon">🐿️</span> 
+               Sóc ơi, giải thích giúp mình!
+             </button>
           </div>
         </div>
         <div id="quiz-footer" class="quiz-footer">
           <button id="btn-next-question" class="btn-primary" disabled>Tiếp tục</button>
+        </div>
+      </section>
+
+      <!-- Pomodoro Screen -->
+      <section id="pomodoro-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Chế độ tập trung ⏱️</h2>
+        </header>
+        <div class="pomodoro-container">
+          <div class="pomo-timer-card">
+            <div class="pomo-circle-wrapper">
+              <div class="pomo-timer-display" id="pomo-time">25:00</div>
+              <svg class="pomo-ring">
+                <circle cx="110" cy="110" r="100"></circle>
+                <circle id="pomo-progress-ring" cx="110" cy="110" r="100"></circle>
+              </svg>
+            </div>
+            <div class="pomo-controls">
+              <button id="pomo-toggle" class="btn-pomo-main">Bắt đầu ngay 🚀</button>
+              <button id="pomo-reset" class="btn-pomo-reset">🔄</button>
+            </div>
+          </div>
+          <div class="pomo-modes">
+            <button class="pomo-mode-btn active" data-time="25">Học tập</button>
+            <button class="pomo-mode-btn" data-time="5">Nghỉ ngắn</button>
+            <button class="pomo-mode-btn" data-time="15">Nghỉ dài</button>
+          </div>
+          <div class="pomo-tips">
+            <h3>Mẹo nhỏ từ Sóc 🐿️</h3>
+            <p id="pomo-tip-text">Hãy tắt điện thoại và tập trung hoàn toàn trong 25 phút này nhé!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notebook Screen -->
+      <section id="notebook-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Sổ tay thông thái 📒</h2>
+        </header>
+        <div class="notebook-layout">
+          <div class="notebook-sidebar">
+             <button class="nb-tab-btn active" data-filter="all">Tất cả</button>
+             <button class="nb-tab-btn" data-filter="math">Toán học</button>
+             <button class="nb-tab-btn" data-filter="english">Tiếng Anh</button>
+          </div>
+          <div class="notebook-main">
+            <div id="notebook-empty" class="notebook-empty-view">
+              <div class="mascot-placeholder" style="font-size: 4rem;">🐿️</div>
+              <p>Bạn chưa lưu gì vào sổ tay cả. Hãy nhấn nút "Lưu vào sổ tập" khi học nhé!</p>
+            </div>
+            <div id="notebook-grid" class="notebook-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Journal Screen -->
+      <section id="journal-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Nhật ký học tập 📖</h2>
+        </header>
+        <div class="journal-container">
+          <div class="journal-header-ai">
+            <div class="mascot-journal" style="font-size: 3rem;">🐿️</div>
+            <div class="journal-ai-talk">
+              <h3>Chào bạn!</h3>
+              <p>Sóc đã ghi chép lại mọi nỗ lực của bạn hôm nay đấy!</p>
+            </div>
+          </div>
+          <div id="journal-list" class="journal-list">
+            <!-- Journal daily entries -->
+          </div>
         </div>
       </section>
 
@@ -826,15 +906,185 @@
       <div id="mascot-container" class="mascot-floating">
         <div class="mascot-bubble" id="mascot-speech">Cùng bắt đầu học nào!</div>
         <div class="mascot-image-wrapper">
-          <span class="mascot-emoji">🐿️</span>
+          <img src="/mascot.png" alt="Mascot" class="mascot-img-floating">
         </div>
       </div>
+
+      <!-- Settings Screen -->
+      <section id="settings-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Cài đặt hệ thống</h2>
+        </header>
+
+        <div class="settings-modern-layout">
+          <aside class="settings-sidebar">
+            <button class="settings-nav-item active" data-settings-tab="general">
+              <span class="icon">⚙️</span>
+              <span class="label">Chung</span>
+            </button>
+            <button class="settings-nav-item" data-settings-tab="notifications">
+              <span class="icon">🔔</span>
+              <span class="label">Thông báo</span>
+            </button>
+            <button class="settings-nav-item" data-settings-tab="data">
+              <span class="icon">💾</span>
+              <span class="label">Dữ liệu</span>
+            </button>
+            <button class="settings-nav-item" data-settings-tab="credits">
+              <span class="icon">👥</span>
+              <span class="label">Đội ngũ</span>
+            </button>
+            <button class="settings-nav-item" data-settings-tab="menu">
+              <span class="icon">📋</span>
+              <span class="label">Menu</span>
+            </button>
+          </aside>
+
+          <main class="settings-main-content">
+            <!-- General Tab -->
+            <div class="settings-tab-panel active" id="settings-tab-general">
+              <div class="settings-panel-header">
+                <h3>Cài đặt chung</h3>
+                <p>Quản lý các thiết lập cơ bản của ứng dụng</p>
+              </div>
+              <div class="settings-list-modern">
+                <div class="settings-item-modern">
+                  <div class="item-info">
+                    <span class="item-title">Âm thanh hiệu ứng</span>
+                    <span class="item-desc">Tiếng click và âm thanh khi hoàn thành bài tập</span>
+                  </div>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="setting-sound" checked>
+                    <label for="setting-sound"></label>
+                  </div>
+                </div>
+                <div class="settings-item-modern">
+                  <div class="item-info">
+                    <span class="item-title">Chế độ ban đêm</span>
+                    <span class="item-desc">Giao diện tối giúp bảo vệ mắt vào buổi tối</span>
+                  </div>
+                  <button class="btn-secondary btn-sm" id="btn-toggle-dark-mode">Thay đổi</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="settings-tab-panel" id="settings-tab-notifications">
+              <div class="settings-panel-header">
+                <h3>Thông báo & Nhắc nhở</h3>
+                <p>Luôn giữ nhịp độ học tập ổn định</p>
+              </div>
+              <div class="settings-list-modern">
+                <div class="settings-item-modern">
+                  <div class="item-info">
+                    <span class="item-title">Nhắc nhở học tập</span>
+                    <span class="item-desc">Gửi thông báo khi đến giờ học bài</span>
+                  </div>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="setting-reminder" checked>
+                    <label for="setting-reminder"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Data Tab -->
+            <div class="settings-tab-panel" id="settings-tab-data">
+              <div class="settings-panel-header">
+                <h3>Quản lý dữ liệu</h3>
+                <p>Sao lưu hoặc xóa dữ liệu cá nhân của bạn</p>
+              </div>
+              <div class="settings-list-modern">
+                <div class="settings-item-modern danger-zone">
+                  <div class="item-info">
+                    <span class="item-title" style="color: var(--error);">Xóa tất cả dữ liệu</span>
+                    <span class="item-desc">Thao tác này không thể hoàn tác. Bạn sẽ mất hết XP và vật phẩm.</span>
+                  </div>
+                  <button class="btn-danger btn-sm" id="btn-clear-data">Reset sạch</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Credits Tab -->
+            <div class="settings-tab-panel" id="settings-tab-credits">
+              <div class="settings-panel-header">
+                <h3>Đội ngũ phát triển</h3>
+                <p>Những người đã tâm huyết xây dựng Sóc Vui Học</p>
+              </div>
+              <div class="credits-grid-modern">
+                <div class="credit-card">
+                  <div class="credit-avatar">👑</div>
+                  <div class="credit-info">
+                    <strong>Việt Hoàng</strong>
+                    <span>Lead Developer</span>
+                  </div>
+                </div>
+                <div class="credit-card">
+                  <div class="credit-avatar">🎨</div>
+                  <div class="credit-info">
+                    <strong>Bá Trọng</strong>
+                    <span>UX/UI & Content</span>
+                  </div>
+                </div>
+                <div class="credit-card">
+                  <div class="credit-avatar">📚</div>
+                  <div class="credit-info">
+                    <strong>Đức Anh</strong>
+                    <span>Academic advisor</span>
+                  </div>
+                </div>
+                <div class="credit-card">
+                  <div class="credit-avatar">⚙️</div>
+                  <div class="credit-info">
+                    <strong>Quang Bình</strong>
+                    <span>Frontend Dev</span>
+                  </div>
+                </div>
+                <div class="credit-card">
+                  <div class="credit-avatar">🚀</div>
+                  <div class="credit-info">
+                    <strong>Quang Dũng</strong>
+                    <span>Core Logic</span>
+                  </div>
+                </div>
+              </div>
+              <p class="credits-footer-modern">squirrel-team © 2024</p>
+            </div>
+
+            <!-- Menu Customization Tab -->
+            <div class="settings-tab-panel" id="settings-tab-menu">
+              <div class="settings-panel-header">
+                <h3>Tùy chỉnh Menu</h3>
+                <p>Chọn tối đa 10 mục bạn muốn hiển thị ở thanh bên</p>
+                <div class="menu-selection-count">Đã chọn: <span id="menu-selected-count">0</span>/10</div>
+              </div>
+              <div class="settings-list-modern" id="menu-customization-list">
+                <!-- Menu items to toggle -->
+              </div>
+            </div>
+          </main>
+        </div>
+      </section>
+
+      <!-- Hub Screen (All Items) -->
+      <section id="hub-screen" class="screen">
+        <header class="sub-header">
+          <button class="btn-back">← Quay lại</button>
+          <h2>Khám phá tất cả 🌀</h2>
+        </header>
+        <div class="hub-grid" id="hub-items-grid">
+          <!-- All menu items as big cards -->
+        </div>
+      </section>
 
       <!-- AI Assistant Chat Modal -->
       <div id="ai-chat-modal" class="ai-chat-modal">
         <div class="chat-header">
           <div class="chat-title">
-            <span class="chat-icon">🐿️</span>
+            <div class="chat-icon">
+              <img src="/mascot.png" alt="Mascot">
+            </div>
             <div>
               <strong>Sóc Ham Học</strong>
               <small>Trợ lý học tập thông minh</small>
@@ -871,12 +1121,24 @@
     </div>
     <!-- Study Reminder Toast -->
     <div id="study-reminder" class="reminder-toast">
-      <div class="mascot-mini">🐿️</div>
+      <div class="mascot-mini"><img src="/mascot.png" alt="Mascot"></div>
       <div class="text-content">
         <h4>Lời nhắc từ Sóc</h4>
         <p id="reminder-msg">Đã đến lúc học bài rồi bạn ơi! 📚</p>
       </div>
       <button class="btn-close-reminder" id="btn-hide-reminder">✕</button>
+    </div>
+
+    <div class="version-tag">Phiên bản v1.0</div>
+
+    <!-- Floating Decorative Particles -->
+    <div class="particles-container">
+      <div class="particle p1">✨</div>
+      <div class="particle p2">⭐</div>
+      <div class="particle p3">🌟</div>
+      <div class="particle p4">✨</div>
+      <div class="particle p5">🪐</div>
+      <div class="particle p6">🚀</div>
     </div>
 
     <script type="module" src="/src/app.js"></script>

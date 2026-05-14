@@ -1,9 +1,24 @@
 /**
  * Sóc Vui Học - Main Application Logic
  */
-import { askSmartSquirrel, getHintOrEncouragement } from './geminiService.js';
+import { askSmartSquirrel, getHintOrEncouragement, getDetailedExplanation } from './geminiService.js';
 
 // --- DATA STRUCTURE ---
+const MENU_ITEMS_LIST = [
+    { id: 'nav-home', label: 'Trang chủ', icon: '🏠', screenId: 'dashboard-screen' },
+    { id: 'nav-roadmap', label: 'Lộ trình', icon: '🗺️', screenId: 'roadmap-screen' },
+    { id: 'nav-games', label: 'Trò chơi', icon: '🎮', screenId: 'games-screen' },
+    { id: 'nav-stats', label: 'Thống kê', icon: '📊', screenId: 'stats-screen' },
+    { id: 'nav-notebook', label: 'Sổ tay', icon: '📒', screenId: 'notebook-screen' },
+    { id: 'nav-pomodoro', label: 'Tập trung', icon: '⏱️', screenId: 'pomodoro-screen' },
+    { id: 'nav-journal', label: 'Nhật ký', icon: '📖', screenId: 'journal-screen' },
+    { id: 'nav-leaderboard', label: 'Xếp hạng', icon: '🏆', screenId: 'leaderboard-screen' },
+    { id: 'nav-store', label: 'Đổi quà', icon: '🎁', screenId: 'store-screen' },
+    { id: 'nav-friends', label: 'Bạn bè', icon: '👥', screenId: 'friends-screen' },
+    { id: 'nav-profile', label: 'Cá nhân', icon: '👤', screenId: 'profile-screen' },
+    { id: 'nav-settings', label: 'Cài đặt', icon: '⚙️', screenId: 'settings-screen' }
+];
+
 const CURRICULUM = {
     math: {
         1: { range: 10, ops: ['+', '-'], themes: ['Số từ 0-10', 'So sánh cơ bản', 'Hình khối cơ bản'], subtopics: ['Nhận biết số', 'Cộng trừ phạm vi 10', 'Hình vuông/tròn/tam giác'] },
@@ -309,14 +324,17 @@ window.closeSyncModal = closeSyncModal;
 // --- REFINED CONTENT GENERATION ---
 function generateQuestions(subject, topicId, lessonId, grade) {
     const questions = [];
-    const config = CURRICULUM[subject][grade] || CURRICULUM[subject][1];
     
     for (let i = 1; i <= 10; i++) {
+        let qText = '', ans = 0, opts = [], category = 'theory', qType = 'choice';
+        
+        // Distribute categories
+        if (i > 7) category = 'application';
+        else if (i > 3) category = 'understanding';
+        else category = 'theory';
+
         if (subject === 'math') {
-            let qText = '', ans = 0, opts = [];
-            
             if (grade <= 2) {
-                // Grade 1-2: Basic math and counting concepts
                 const r = (grade === 1) ? 10 : 100;
                 const a = Math.floor(Math.random() * r);
                 const b = Math.floor(Math.random() * (r - a));
@@ -331,7 +349,6 @@ function generateQuestions(subject, topicId, lessonId, grade) {
                     ans = max - min;
                 }
             } else if (grade <= 5) {
-                // Grade 3-5: Multi-step, decimals, fractions
                 if (Math.random() > 0.6) {
                     const aNum = parseFloat((Math.random() * 10).toFixed(1));
                     const bNum = parseFloat((Math.random() * 10).toFixed(1));
@@ -344,28 +361,26 @@ function generateQuestions(subject, topicId, lessonId, grade) {
                     ans = a * b;
                 }
             } else if (grade <= 7) {
-                // Grade 6-7: Integers, basic algebra
                 const x = Math.floor(Math.random() * 20) - 10;
                 const b = Math.floor(Math.random() * 10);
                 const res = x + b;
                 qText = `Giải phương trình: x + ${b} = ${res}`;
                 ans = x;
+                if (category === 'application') qType = 'text';
             } else {
-                // Grade 8-9: Quadratic, systems
                 const x = Math.floor(Math.random() * 5) + 1;
                 qText = `Giải x: ${x}² + 2 = ${x*x + 2}`;
                 ans = x;
+                if (category === 'application') qType = 'text';
             }
 
             opts = [ans, ans + 1, ans - 1, Math.floor(Math.random() * 20)].map(String);
-            // Ensure unique options
             opts = [...new Set(opts)];
             while(opts.length < 4) opts.push(String(Math.floor(Math.random() * 100)));
             opts.sort(() => Math.random() - 0.5);
             
-            questions.push({ q: qText, options: opts, answer: String(ans) });
+            questions.push({ q: qText, options: opts, answer: String(ans), category, type: qType });
         } else {
-            // English Grade-based with theme and subtopic variety
             const engConfig = CURRICULUM.english[grade] || CURRICULUM.english[1];
             const themeIndex = typeof topicId === 'string' && topicId.startsWith('e') ? parseInt(topicId.substring(1)) || 0 : 0;
             const theme = engConfig.themes[themeIndex % engConfig.themes.length] || "General";
@@ -373,18 +388,14 @@ function generateQuestions(subject, topicId, lessonId, grade) {
             const subtopic = subtopics[i % subtopics.length];
             
             const engQTypes = [
-                { q: `Chọn nghĩa của từ: "${theme}"`, a: "Đúng nghĩa", opts: ["Đúng nghĩa", "Sai nghĩa", "Trái nghĩa", "Không biết"] },
-                { q: `Điền vào chỗ trống: ${subtopic} is ...`, a: "Good", opts: ["Good", "Bad", "Table", "Car"] },
-                { q: `Từ nào khác loại:`, a: "Apple", opts: ["Apple", "Run", "Jump", "Walk"] },
-                { q: `Sắp xếp: "I / study / English"`, a: "I study English", opts: ["I study English", "Study I English", "English study I", "I English study"] }
+                { q: `Chọn nghĩa của từ: "${theme}"`, a: "English", opts: ["English", "Vietnamese", "Old", "New"], cat: 'theory', t: 'choice' },
+                { q: `Điền vào chỗ trống: ${subtopic} is ...`, a: "Good", opts: ["Good", "Bad", "Table", "Car"], cat: 'understanding', t: 'choice' },
+                { q: `Translate: "Học sinh"`, a: "student", opts: ["student", "teacher", "doctor", "pilot"], cat: 'application', t: 'text' },
+                { q: `Sắp xếp: "I / study / English"`, a: "I study English", opts: ["I study English", "Study I English", "English study I", "I English study"], cat: 'application', t: 'choice' }
             ];
 
             const type = engQTypes[i % engQTypes.length];
-            qText = type.q;
-            ans = type.a;
-            opts = type.opts;
-            
-            questions.push({ q: qText, options: opts, answer: ans });
+            questions.push({ q: type.q, options: type.opts, answer: type.a, category: type.cat, type: type.t });
         }
     }
     return questions;
@@ -406,13 +417,24 @@ let state = {
     questionIndex: 0,
     score: 0,
     theme: 'light',
+    soundEnabled: true,
+    reminderEnabled: true,
     completedLessons: [], // Track finished lessons
     chatHistory: [],
     badges: [],
     ownedItems: [], // Track purchased items
     friends: [], // Track friend list
+    notebook: [], // NEW: Knowledge Notebook
+    journal: [], // NEW: AI Learning Journal
+    pomodoro: {
+        timer: null,
+        timeLeft: 1500, // 25 mins
+        isRunning: false,
+        activeMode: 25 // in minutes
+    },
     equippedAvatar: '🐿️',
     lastLessonDate: null, // Track when the last lesson was completed
+    reminderDismissed: false, // Added to prevent annoying re-popups
     isChatOpen: false,
     mathGame: {
         score: 0,
@@ -453,6 +475,7 @@ let state = {
         currentIndex: 0,
         data: []
     },
+    visibleMenuItems: ['nav-home', 'nav-roadmap', 'nav-games', 'nav-stats', 'nav-notebook', 'nav-pomodoro', 'nav-journal', 'nav-leaderboard', 'nav-store', 'nav-friends', 'nav-profile', 'nav-settings'],
     missions: [
         { id: 'math_play', title: 'Chơi 2 ván Toán', type: 'math_play', current: 0, target: 2, reward: 20, completed: false, claimed: false },
         { id: 'english_play', title: 'Học 1 bài Tiếng Anh', type: 'english_play', current: 0, target: 1, reward: 30, completed: false, claimed: false },
@@ -572,6 +595,7 @@ function init() {
     loadUserData();
     setupEventListeners();
     updateUI();
+    renderSidebar();
     
     if (!state.user) {
         switchToScreen('welcome-screen');
@@ -596,6 +620,11 @@ function loadUserData() {
     const savedFriends = localStorage.getItem('soc_vui_hoc_friends');
     const savedChat = localStorage.getItem('soc_vui_hoc_chat_history');
     const savedLastLesson = localStorage.getItem('soc_vui_hoc_last_lesson_date');
+    const savedSound = localStorage.getItem('soc_vui_hoc_sound');
+    const savedReminder = localStorage.getItem('soc_vui_hoc_reminder');
+    const savedNotebook = localStorage.getItem('soc_vui_hoc_notebook');
+    const savedJournal = localStorage.getItem('soc_vui_hoc_journal');
+    const savedMenu = localStorage.getItem('soc_vui_hoc_menu');
     
     if (savedUser) {
         try {
@@ -616,6 +645,11 @@ function loadUserData() {
             state.friends = JSON.parse(savedFriends || '[]');
             state.lastLessonDate = savedLastLesson || null;
             state.equippedAvatar = savedAvatar || '🐿️';
+            state.soundEnabled = savedSound === null ? true : savedSound === 'true';
+            state.reminderEnabled = savedReminder === null ? true : savedReminder === 'true';
+            state.notebook = JSON.parse(savedNotebook || '[]');
+            state.journal = JSON.parse(savedJournal || '[]');
+            state.visibleMenuItems = JSON.parse(savedMenu || '["nav-home", "nav-roadmap", "nav-games", "nav-stats", "nav-notebook", "nav-pomodoro", "nav-journal", "nav-leaderboard", "nav-store", "nav-friends", "nav-profile", "nav-settings"]');
             if (savedMissions) state.missions = JSON.parse(savedMissions);
             switchToScreen('dashboard-screen');
         } catch (e) {
@@ -645,10 +679,27 @@ function saveProgress() {
     localStorage.setItem('soc_vui_hoc_missions', JSON.stringify(state.missions));
     localStorage.setItem('soc_vui_hoc_last_lesson_date', state.lastLessonDate || '');
     localStorage.setItem('soc_vui_hoc_friends', JSON.stringify(state.friends || []));
+    localStorage.setItem('soc_vui_hoc_notebook', JSON.stringify(state.notebook || []));
+    localStorage.setItem('soc_vui_hoc_journal', JSON.stringify(state.journal || []));
+    localStorage.setItem('soc_vui_hoc_sound', state.soundEnabled);
+    localStorage.setItem('soc_vui_hoc_reminder', state.reminderEnabled);
+    localStorage.setItem('soc_vui_hoc_menu', JSON.stringify(state.visibleMenuItems));
 }
+
+let studyReminderTimeout = null;
 
 function switchToScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    
+    // Hide reminder if moving away from dashboard
+    if (screenId !== 'dashboard-screen') {
+        hideReminder();
+        if (studyReminderTimeout) {
+            clearTimeout(studyReminderTimeout);
+            studyReminderTimeout = null;
+        }
+    }
+
     const target = document.getElementById(screenId);
     if (target) {
         target.classList.add('active');
@@ -656,7 +707,8 @@ function switchToScreen(screenId) {
         
         // Trigger study reminder if going to dashboard
         if (screenId === 'dashboard-screen') {
-            setTimeout(checkStudyReminder, 4000);
+            if (studyReminderTimeout) clearTimeout(studyReminderTimeout);
+            studyReminderTimeout = setTimeout(checkStudyReminder, 4000);
         }
     }
 }
@@ -1127,28 +1179,70 @@ function handleSubjectSelect(subjectKey) {
     const sub = SUBJECTS_DATA[subjectKey];
     const titleEl = document.getElementById('current-subject-title');
     if (titleEl) titleEl.textContent = sub.title;
-    
+    renderTopicsScreen();
+}
+
+function renderTopicsScreen() {
+    const sub = SUBJECTS_DATA[state.currentSubject];
     const container = document.getElementById('topic-container');
     if (!container) return;
     container.innerHTML = '';
     
+    // Adventure Map Container
+    const map = document.createElement('div');
+    map.className = 'adventure-map';
+    
+    // Add some random floating clouds/elements for decor
+    const decor = document.createElement('div');
+    decor.className = 'adventure-decor';
+    decor.innerHTML = `
+        <div class="decor-item" style="top: 5%; left: 15%; font-size: 3rem; opacity: 0.2; animation: float 12s infinite;">☁️</div>
+        <div class="decor-item" style="top: 25%; right: 20%; font-size: 4rem; opacity: 0.15; animation: float 15s infinite reverse;">☁️</div>
+        <div class="decor-item" style="bottom: 15%; left: 10%; font-size: 2.5rem; opacity: 0.3;">🌴</div>
+        <div class="decor-item" style="bottom: 10%; right: 5%; font-size: 3.5rem; opacity: 0.3;">🏔️</div>
+        <div class="decor-item" style="top: 15%; left: 40%; font-size: 1.5rem; opacity: 0.4; animation: float 6s infinite;">🐦</div>
+    `;
+    map.appendChild(decor);
+    
+    const landVisuals = [
+        { icon: '🏔️', name: 'Đỉnh Núi Trí Tuệ' },
+        { icon: '🌳', name: 'Rừng Xanh Logic' },
+        { icon: '🏖️', name: 'Đảo Số Học' },
+        { icon: '🌋', name: 'Núi Lửa Thách Thức' },
+        { icon: '☁️', name: 'Thành Phố Trên Mây' },
+        { icon: '🎋', name: 'Thung Lũng Bình Yên' },
+        { icon: '🏰', name: 'Lâu Đài Kiến Thức' },
+        { icon: '🏜️', name: 'Sa Mạc Bí Ẩn' },
+        { icon: '❄️', name: 'Vùng Đất Băng Giá' }
+    ];
+    
     const topics = sub.getTopics(state.currentGrade);
     topics.forEach((topic, idx) => {
-        const div = document.createElement('div');
-        div.className = 'topic-item';
-        div.innerHTML = `
-            <div>
-                <span class="topic-num">${idx + 1}</span>
-                <span class="topic-title">${topic.title}</span>
+        const land = document.createElement('div');
+        land.className = 'land-card';
+        land.style.animationDelay = `${idx * 0.1}s`;
+        land.onclick = () => handleTopicSelect(topic);
+        
+        const visual = landVisuals[idx % landVisuals.length];
+        const isCompletedCount = (topic.lessons || []).filter(l => state.completedLessons.includes(l.id)).length;
+        const totalLessons = (topic.lessons || []).length || 8;
+        const progressPercent = (isCompletedCount / totalLessons) * 100;
+        
+        land.innerHTML = `
+            <div class="land-visual">${visual.icon}</div>
+            <div class="land-title">${topic.title}</div>
+            <div class="land-desc">${visual.name}</div>
+            <div class="land-progress-bar" style="width: 80%; height: 8px; background: #f1f5f9; border-radius: 4px; margin: 15px 0; overflow: hidden;">
+                <div class="progress" style="width: ${progressPercent}%; height: 100%; background: var(--primary); transition: width 0.3s;"></div>
             </div>
-            <span class="chevron">→</span>
+            <div class="land-tag">Hoàn thành: ${isCompletedCount}/${totalLessons}</div>
         `;
-        div.onclick = () => handleTopicSelect(topic);
-        container.appendChild(div);
+        map.appendChild(land);
     });
     
+    container.appendChild(map);
     switchToScreen('topics-screen');
-    showMascotMessage("Lựa chọn rất đúng đắn!");
+    showMascotMessage("Chào mừng đến với bản đồ phiêu lưu! 🗺️✨");
 }
 
 function handleTopicSelect(topic) {
@@ -1160,26 +1254,81 @@ function handleTopicSelect(topic) {
     if (!container) return;
     container.innerHTML = '';
     
-    // Use actual lessons from topic data if available, otherwise fallback to generic 8
-    const lessonList = (topic.lessons && Array.isArray(topic.lessons)) ? topic.lessons : Array.from({length: 8}, (_, k) => ({ id: k + 1, title: `Bài ${k + 1}` }));
+    // Adventure Path Container
+    const pathContainer = document.createElement('div');
+    pathContainer.className = 'adventure-path-container';
+    
+    // Add decorations
+    const decor = document.createElement('div');
+    decor.className = 'adventure-decor';
+    decor.innerHTML = `
+        <div class="decor-item" style="top: 15%; left: 10%; font-size: 2rem; opacity: 0.2;">🍄</div>
+        <div class="decor-item" style="top: 45%; right: 15%; font-size: 2.5rem; opacity: 0.2;">🍃</div>
+        <div class="decor-item" style="bottom: 25%; left: 20%; font-size: 2rem; opacity: 0.2;">🌿</div>
+        <div class="decor-item" style="top: 5%; right: 25%; font-size: 3rem; opacity: 0.1;">☁️</div>
+    `;
+    pathContainer.appendChild(decor);
+    
+    const lessonList = (topic.lessons && Array.isArray(topic.lessons)) ? topic.lessons : Array.from({length: 8}, (_, k) => ({ id: k + 1, title: `Bài ${k + 1}`, icon: '📔' }));
+    
+    // Create connection lines SVG
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute('class', 'adventure-path-svg');
+    const pathLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    pathLine.setAttribute('class', 'path-line');
+    
+    let pathD = "";
+    const ySpacing = 160;
+    const canvasWidth = 600; // Base width for coordinates
+    const totalHeight = (lessonList.length * ySpacing) + 100;
+    svg.setAttribute('viewBox', `0 0 ${canvasWidth} ${totalHeight}`);
+    svg.style.height = `${totalHeight}px`;
+    pathContainer.style.height = `${totalHeight}px`;
     
     lessonList.forEach((lesson, index) => {
-        const div = document.createElement('div');
-        div.className = 'lesson-card';
-        div.innerHTML = `
-            <div class="lesson-icon">📖</div>
-            <h4>${lesson.title || `Bài ${index + 1}`}</h4>
+        // Zigzag around the center (300px)
+        const offset = index % 2 === 0 ? -60 : 60;
+        const x = 300 + offset; 
+        const y = (index * ySpacing) + 100;
+        
+        if (index === 0) pathD += `M ${x} ${y}`;
+        else {
+            const prevX = 300 + ((index-1) % 2 === 0 ? -60 : 60);
+            const prevY = ((index-1) * ySpacing) + 100;
+            // Add a slight curve to the path
+            pathD += ` C ${prevX} ${prevY + ySpacing/2}, ${x} ${y - ySpacing/2}, ${x} ${y}`;
+        }
+        
+        const nodeWrapper = document.createElement('div');
+        nodeWrapper.className = 'path-node-wrapper';
+        nodeWrapper.style.transform = `translateX(${offset}px)`;
+        
+        const isCompleted = state.completedLessons.includes(lesson.id);
+        const subjectClass = state.currentSubject === 'math' ? 'math' : 'english';
+        
+        nodeWrapper.innerHTML = `
+            <div class="path-node ${isCompleted ? 'completed' : ''} ${subjectClass}" onclick="window.startQuiz('${lesson.id}')">
+                ${lesson.icon || '📔'}
+                ${isCompleted ? '<div class="node-status">✓</div>' : ''}
+                ${index === 0 ? '<div class="node-badge">Khởi hành</div>' : ''}
+                ${index === lessonList.length - 1 ? '<div class="node-badge" style="bottom: -25px; background: #9333ea;">Đích đến</div>' : ''}
+            </div>
+            <div class="node-title">${lesson.title || `Chặng ${index + 1}`}</div>
         `;
-        div.onclick = () => startQuiz(lesson.id || index + 1);
-        container.appendChild(div);
+        pathContainer.appendChild(nodeWrapper);
     });
     
+    pathLine.setAttribute('d', pathD);
+    svg.appendChild(pathLine);
+    pathContainer.prepend(svg);
+    
+    container.appendChild(pathContainer);
     switchToScreen('lessons-screen');
 }
 
 // --- QUIZ LOGIC ---
 
-function startQuiz(lessonNum) {
+window.startQuiz = (lessonNum) => {
     state.currentLesson = lessonNum;
     state.currentQuestions = generateQuestions(state.currentSubject, state.currentTopic.id, lessonNum, state.currentGrade);
     state.questionIndex = 0;
@@ -1193,86 +1342,125 @@ function startQuiz(lessonNum) {
 function renderQuestion() {
     const q = state.currentQuestions[state.questionIndex];
     const qText = document.getElementById('question-text');
-    const qCounter = document.getElementById('quiz-counter');
+    const qPoints = document.getElementById('quiz-points-counter');
     const progressFill = document.getElementById('quiz-progress-fill');
+    const categoryTag = document.getElementById('question-category-tag');
+    const aiHelper = document.getElementById('btn-ask-ai-explanation');
     
     if (qText) qText.textContent = q.q;
-    if (qCounter) qCounter.textContent = `${state.score}/20 điểm`;
+    if (qPoints) qPoints.textContent = `${state.score}/20 điểm`;
+    
+    // Category Tag Logic
+    if (categoryTag) {
+        categoryTag.className = `category-tag ${q.category || 'theory'}`;
+        const labels = { theory: 'Lý thuyết', understanding: 'Thông hiểu', application: 'Vận dụng' };
+        categoryTag.textContent = labels[q.category] || 'Lý thuyết';
+    }
+
+    // AI Helper Logic (Only for application)
+    if (aiHelper) {
+        aiHelper.style.display = q.category === 'application' ? 'flex' : 'none';
+    }
     
     const progress = (state.score / 20) * 100;
     if (progressFill) progressFill.style.width = `${progress}%`;
     
     const optionsContainer = document.getElementById('options-container');
-    if (!optionsContainer) return;
-    optionsContainer.innerHTML = '';
-    
-    q.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.textContent = opt;
-        btn.onclick = () => handleAnswer(opt, btn);
-        optionsContainer.appendChild(btn);
-    });
+    const textInputContainer = document.getElementById('text-input-container');
+    const textInput = document.getElementById('quiz-text-answer');
+
+    if (q.type === 'text') {
+        if (optionsContainer) optionsContainer.style.display = 'none';
+        if (textInputContainer) textInputContainer.style.display = 'flex';
+        if (textInput) {
+            textInput.value = '';
+            textInput.disabled = false;
+        }
+    } else {
+        if (optionsContainer) {
+            optionsContainer.style.display = 'grid';
+            optionsContainer.innerHTML = '';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => handleAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+        if (textInputContainer) textInputContainer.style.display = 'none';
+    }
     
     const nextBtn = document.getElementById('btn-next-question');
     if (nextBtn) nextBtn.disabled = true;
+    state.isAnswering = false;
 }
 
-async function handleAnswer(selected, btn) {
+async function handleAnswer(selected, element) {
     const q = state.currentQuestions[state.questionIndex];
+    if (state.isAnswering) return; // Prevent multiple clicks
+    state.isAnswering = true;
+
     const allBtns = document.querySelectorAll('.option-btn');
-    allBtns.forEach(b => b.disabled = true);
+    const textInput = document.getElementById('quiz-text-answer');
+    const submitBtn = document.getElementById('btn-submit-text-answer');
     
-    if (selected === q.answer) {
-        btn.classList.add('correct');
+    if (allBtns) allBtns.forEach(b => b.disabled = true);
+    if (textInput) textInput.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
+    
+    // Exact or Normalized text comparison
+    const normalizedSelected = String(selected).trim().toLowerCase();
+    const normalizedAnswer = String(q.answer).trim().toLowerCase();
+    const isCorrect = normalizedSelected === normalizedAnswer;
+
+    if (isCorrect) {
+        if (element && element.classList) element.classList.add('correct');
         const oldLevel = state.level;
         state.score++;
-        state.xp += 10; // More XP for correct answer
+        state.xp += 15; // Increased XP for the new structure
         state.level = Math.floor(state.xp / 100) + 1;
         
         if (state.level > oldLevel) {
             showMascotMessage(`BẠN ĐÃ LÊN CẤP ${state.level}! 🎉`, 4000);
         } else {
             const encouragements = [
-                "Chính xác! +10 XP",
-                "Quá giỏi luôn! ✨",
-                "Tiếp tục thế nhé! 🐿️",
-                "Bạn thông minh quá!"
+                "Chính xác! +15 XP", "Quá giỏi luôn! ✨", "Sóc rất tự hào về bạn!", "Bạn thông minh vượt bậc!"
             ];
             const msg = encouragements[Math.floor(Math.random() * encouragements.length)];
             showMascotMessage(msg, 1500);
         }
     } else {
-        btn.classList.add('wrong');
+        if (element && element.classList) element.classList.add('wrong');
         const quizBody = document.querySelector('.quiz-body');
         if (quizBody) {
              quizBody.classList.add('wrong-animation');
              setTimeout(() => quizBody.classList.remove('wrong-animation'), 300);
         }
-        
         state.score = Math.max(0, state.score - 1);
-        allBtns.forEach(b => {
-            if (b.textContent == q.answer) b.classList.add('correct');
-        });
-        
-        // AI Hint when wrong
-        const hint = await getHintOrEncouragement(`Học sinh vừa làm sai bài toán/tiếng anh lớp ${state.currentGrade}. Câu hỏi là: ${q.q}. Đáp án đúng là: ${q.answer}.`);
+        if (q.type !== 'text') {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                if (String(b.textContent).trim().toLowerCase() === normalizedAnswer) b.classList.add('correct');
+            });
+        } else {
+            showMascotMessage(`Tiếc quá, đáp án đúng là: ${q.answer} 🐿️`, 3000);
+        }
+        const hint = await getHintOrEncouragement(`Học sinh làm sai câu hỏi lớp ${state.currentGrade}. Câu: ${q.q}. Đáp án đúng: ${q.answer}. Hãy động viên.`);
         showMascotMessage(hint, 4000);
     }
-    
     const nextBtn = document.getElementById('btn-next-question');
     if (nextBtn) nextBtn.disabled = false;
-    
+    state.isAnswering = false;
     saveProgress();
     updateUI();
-    
-    // Update progress bar immediately after answer
-    const progress = (state.score / 20) * 100;
+    const qPoints = document.getElementById('quiz-points-counter');
+    if (qPoints) qPoints.textContent = `${state.score}/20 điểm`;
     const progressFill = document.getElementById('quiz-progress-fill');
-    const qCounter = document.getElementById('quiz-counter');
-    if (progressFill) progressFill.style.width = `${progress}%`;
-    if (qCounter) qCounter.textContent = `${state.score}/20 điểm`;
+    if (progressFill) progressFill.style.width = `${(state.score / 20) * 100}%`;
 }
+
+
 
 function nextQuestion() {
     if (state.score >= 20) {
@@ -1300,6 +1488,9 @@ function finishQuiz() {
     
     switchToScreen('result-screen');
     showMascotMessage("Rất tốt! Cùng xem thành quả nào.");
+    
+    // Add to journal asynchronously
+    addJournalEntry(1, state.score, Math.floor(state.score / 2));
 }
 
 function showStats() {
@@ -2125,7 +2316,15 @@ window.claimMissionReward = claimMissionReward;
 
 // Study Reminder Logic
 function checkStudyReminder() {
-    if (!state.user) return;
+    if (!state.user || state.reminderDismissed) return;
+    
+    // Safety: Only show if we are still on dashboard
+    const dashboard = document.getElementById('dashboard-screen');
+    if (!dashboard || !dashboard.classList.contains('active')) return;
+    
+    // Don't show if in a lesson or other screens
+    const currentActiveScreen = document.querySelector('.screen.active');
+    if (currentActiveScreen && currentActiveScreen.id !== 'dashboard-screen') return;
     
     const today = new Date().toDateString();
     if (state.lastLessonDate === today) return; // Already studied today
@@ -2146,16 +2345,18 @@ function checkStudyReminder() {
     reminderMsg.textContent = message;
     reminderToast.classList.add('active');
     
-    // Auto hide after 10 seconds
-    setTimeout(() => {
-        reminderToast.classList.remove('active');
-    }, 10000);
+    // Auto hide after 15 seconds
+    if (window.autoHideReminder) clearTimeout(window.autoHideReminder);
+    window.autoHideReminder = setTimeout(() => {
+        hideReminder();
+    }, 15000);
 }
 
 function hideReminder() {
     const reminderToast = document.getElementById('study-reminder');
     if (reminderToast) {
         reminderToast.classList.remove('active');
+        state.reminderDismissed = true; // Dismiss for this session
     }
 }
 
@@ -2197,8 +2398,13 @@ function setupEventListeners() {
         missionsModal.classList.add('active');
     };
 
-    const closeModalBtn = document.querySelector('.btn-close-modal');
-    if (closeModalBtn) closeModalBtn.onclick = () => missionsModal.classList.remove('active');
+    const closeMissionsModalBtn = document.getElementById('btn-close-missions-modal');
+    if (closeMissionsModalBtn) closeMissionsModalBtn.onclick = () => missionsModal.classList.remove('active');
+    if (missionsModal) {
+        missionsModal.onclick = (e) => {
+            if (e.target === missionsModal) missionsModal.classList.remove('active');
+        };
+    }
     
     const roadmapTrigger = document.getElementById('roadmap-trigger');
     if (roadmapTrigger) roadmapTrigger.onclick = () => {
@@ -2337,51 +2543,14 @@ function setupEventListeners() {
         showLeaderboard();
     };
 
-    // Sidebar Nav Handlers
-    const navHome = document.getElementById('nav-home');
-    const navRoadmap = document.getElementById('nav-roadmap');
-    const navGames = document.getElementById('nav-games');
-    const navStats = document.getElementById('nav-stats');
-    const navLeaderboard = document.getElementById('nav-leaderboard');
-    const navStore = document.getElementById('nav-store');
-    const navFriends = document.getElementById('nav-friends');
-    const navProfile = document.getElementById('nav-profile');
-
+    // Sidebar Nav Handlers (REMOVED: Now handled by renderSidebar dynamically)
     const updateNavActive = (activeId) => {
+        window.activeNavId = activeId;
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.getElementById(activeId);
         if (activeBtn) activeBtn.classList.add('active');
     };
-
-    if (navHome) navHome.onclick = () => {
-        updateNavActive('nav-home');
-        switchToScreen('dashboard-screen');
-    };
-
-    if (navRoadmap) navRoadmap.onclick = () => {
-        updateNavActive('nav-roadmap');
-        showRoadmap();
-    };
-
-    if (navGames) navGames.onclick = () => {
-        updateNavActive('nav-games');
-        switchToScreen('games-screen');
-    };
-
-    if (navStats) navStats.onclick = () => {
-        updateNavActive('nav-stats');
-        showStats();
-    };
-
-    if (navLeaderboard) navLeaderboard.onclick = () => {
-        updateNavActive('nav-leaderboard');
-        showLeaderboard();
-    };
-
-    if (navStore) navStore.onclick = () => {
-        updateNavActive('nav-store');
-        showStore();
-    };
+    window.updateNavActive = updateNavActive;
 
     const tabBuy = document.getElementById('tab-buy');
     const tabInv = document.getElementById('tab-inventory');
@@ -2401,15 +2570,55 @@ function setupEventListeners() {
         };
     }
 
-    if (navFriends) navFriends.onclick = () => {
-        updateNavActive('nav-friends');
-        switchToScreen('friends-screen');
-        renderFriends();
-    };
+    // Modern Settings Tab Switching
+    const settingsNavItems = document.querySelectorAll('.settings-nav-item');
+    settingsNavItems.forEach(item => {
+        item.onclick = () => {
+            const tabId = item.getAttribute('data-settings-tab');
+            
+            // Update nav active state
+            settingsNavItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Update content panel
+            document.querySelectorAll('.settings-tab-panel').forEach(p => p.classList.remove('active'));
+            const targetPanel = document.getElementById(`settings-tab-${tabId}`);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+                if (tabId === 'menu') updateMenuSettingsList();
+            }
+        };
+    });
 
-    if (navProfile) navProfile.onclick = () => {
-        updateNavActive('nav-profile');
-        showProfile();
+    // Text Input Submit Logic
+    const submitTextBtn = document.getElementById('btn-submit-text-answer');
+    const textInput = document.getElementById('quiz-text-answer');
+    if (submitTextBtn && textInput) {
+        submitTextBtn.onclick = () => {
+            handleAnswer(textInput.value, textInput);
+        };
+        textInput.onkeypress = (e) => {
+            if (e.key === 'Enter') handleAnswer(textInput.value, textInput);
+        };
+    }
+
+    const clearDataBtn = document.getElementById('btn-clear-data');
+    if (clearDataBtn) clearDataBtn.onclick = () => {
+        if (confirm("CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu trên thiết bị này không? Hành động này không thể hoàn tác.")) {
+            // Xóa LocalStorage liên quan đến game
+            const keysToRemove = [
+                'soc_vui_hoc_user', 'soc_vui_hoc_xp', 'soc_vui_hoc_level', 
+                'soc_vui_hoc_coins', 'soc_vui_hoc_streak', 'soc_vui_hoc_lessons',
+                'soc_vui_hoc_grade', 'soc_vui_hoc_badges', 'soc_vui_hoc_owned',
+                'soc_vui_hoc_friends', 'soc_vui_hoc_last_lesson_date',
+                'soc_vui_hoc_math_high', 'soc_vui_hoc_english_high',
+                'soc_vui_hoc_scramble_high', 'soc_vui_hoc_trivia_high'
+            ];
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Tải lại trang để reset state
+            location.reload();
+        }
     };
 
     // Keep top profile link working
@@ -2505,10 +2714,36 @@ function setupEventListeners() {
     if (gradeDashBtn) gradeDashBtn.onclick = showGradeSelection;
 
     const themeBtn = document.getElementById('btn-toggle-theme');
-    if (themeBtn) themeBtn.onclick = () => {
+    const settingsThemeBtn = document.getElementById('btn-toggle-dark-mode');
+    const toggleThemeFn = () => {
         state.theme = state.theme === 'light' ? 'dark' : 'light';
         document.body.className = state.theme + '-theme';
+        showMascotMessage(`Đã chuyển sang giao diện ${state.theme === 'dark' ? 'tối' : 'sáng'}! 🌓`, 2000);
+        saveProgress();
     };
+    if (themeBtn) themeBtn.onclick = toggleThemeFn;
+    if (settingsThemeBtn) settingsThemeBtn.onclick = toggleThemeFn;
+
+    // Sound & Reminder listeners
+    const soundToggle = document.getElementById('setting-sound');
+    if (soundToggle) {
+        soundToggle.checked = state.soundEnabled;
+        soundToggle.onchange = (e) => {
+            state.soundEnabled = e.target.checked;
+            saveProgress();
+            showMascotMessage(`Âm thanh đã ${state.soundEnabled ? 'bật' : 'tắt'}. 🐿️🔊`, 2000);
+        };
+    }
+
+    const reminderToggle = document.getElementById('setting-reminder');
+    if (reminderToggle) {
+        reminderToggle.checked = state.reminderEnabled;
+        reminderToggle.onchange = (e) => {
+            state.reminderEnabled = e.target.checked;
+            saveProgress();
+            showMascotMessage(`Lời nhắc đã ${state.reminderEnabled ? 'bật' : 'tắt'}. 🐿️⏰`, 2000);
+        };
+    }
 
     document.querySelectorAll('.subject-card').forEach(card => {
         card.onclick = () => handleSubjectSelect(card.dataset.subject);
@@ -2542,7 +2777,7 @@ function setupEventListeners() {
     
     const exitQuizBtn = document.getElementById('btn-exit-quiz');
     if (exitQuizBtn) exitQuizBtn.onclick = () => {
-        if (confirm("Chưa xong đâu, thoát nhé?")) switchToScreen('dashboard-screen');
+        switchToScreen('lessons-screen');
     };
     
     const backHomeBtn = document.getElementById('btn-back-home');
@@ -2550,6 +2785,10 @@ function setupEventListeners() {
 
     const mascotWrapper = document.querySelector('.mascot-image-wrapper');
     if (mascotWrapper) mascotWrapper.onclick = toggleAIChat;
+
+    const askAIExplanationBtn = document.getElementById('btn-ask-ai-explanation');
+    if (askAIExplanationBtn) askAIExplanationBtn.onclick = handleAIExplanation;
+
 
     const hideReminderBtn = document.getElementById('btn-hide-reminder');
     if (hideReminderBtn) hideReminderBtn.onclick = hideReminder;
@@ -2569,7 +2808,401 @@ function setupEventListeners() {
             }
         };
     }
+
+    // Pomodoro Listeners
+    const pomoToggle = document.getElementById('pomo-toggle');
+    if (pomoToggle) pomoToggle.onclick = togglePomodoro;
+
+    const pomoResetBtn = document.getElementById('pomo-reset');
+    if (pomoResetBtn) pomoResetBtn.onclick = resetPomodoro;
+
+    document.querySelectorAll('.pomo-mode-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.pomodoro.activeMode = parseInt(btn.dataset.time);
+            resetPomodoro();
+        };
+    });
+
+    // Notebook Listeners
+    document.querySelectorAll('.nb-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.nb-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderNotebook(btn.dataset.filter);
+        };
+    });
 }
 
 // Start the app
 init();
+
+// --- NEW FEATURES IMPLEMENTATION ---
+
+function renderSidebar() {
+    const sidebar = document.querySelector('.sidebar-nav');
+    if (!sidebar) return;
+    
+    // Clear old items (except the footer/all hub button)
+    const items = sidebar.querySelectorAll('.nav-item:not(#nav-all-hub)');
+    items.forEach(item => item.remove());
+    
+    // Predepend visible items
+    const footer = sidebar.querySelector('.sidebar-footer');
+    
+    MENU_ITEMS_LIST.forEach(itemConfig => {
+        if (state.visibleMenuItems.includes(itemConfig.id)) {
+            const btn = document.createElement('button');
+            btn.className = `nav-item ${window.activeNavId === itemConfig.id ? 'active' : ''}`;
+            btn.id = itemConfig.id;
+            btn.innerHTML = `
+                <span class="icon">${itemConfig.icon}</span> 
+                <span class="label">${itemConfig.label}</span>
+            `;
+            btn.onclick = () => {
+                updateNavActive(itemConfig.id);
+                
+                // Handle special actions
+                switch(itemConfig.id) {
+                    case 'nav-roadmap': showRoadmap(); break;
+                    case 'nav-stats': showStats(); break;
+                    case 'nav-notebook': showNotebook(); break;
+                    case 'nav-pomodoro': showPomodoro(); break;
+                    case 'nav-journal': showJournal(); break;
+                    case 'nav-leaderboard': showLeaderboard(); break;
+                    case 'nav-store': showStore(); break;
+                    case 'nav-friends': switchToScreen('friends-screen'); renderFriends(); break;
+                    case 'nav-profile': showProfile(); break;
+                    case 'nav-settings': 
+                        switchToScreen('settings-screen');
+                        document.querySelector('.settings-nav-item[data-settings-tab="general"]')?.click();
+                        break;
+                    default: switchToScreen(itemConfig.screenId);
+                }
+            };
+            sidebar.insertBefore(btn, footer);
+        }
+    });
+
+    // Handle Active State properly
+    updateNavActive(window.activeNavId || 'nav-home');
+
+    // All Hub Button
+    const allHubBtn = document.getElementById('nav-all-hub');
+    if (allHubBtn) {
+        allHubBtn.onclick = openHub;
+    }
+}
+
+function openHub() {
+    switchToScreen('hub-screen');
+    const grid = document.getElementById('hub-items-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = MENU_ITEMS_LIST.map(item => `
+        <div class="hub-item" onclick="handleHubClick('${item.id}')">
+            <div class="hub-icon">${item.icon}</div>
+            <div class="hub-label">${item.label}</div>
+        </div>
+    `).join('');
+}
+
+window.handleHubClick = (id) => {
+    const item = MENU_ITEMS_LIST.find(i => i.id === id);
+    if (item) {
+        updateNavActive(id);
+        // Reuse the logic from sidebar click
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.click();
+        } else {
+            // Fallback if button not in sidebar
+            switch(id) {
+                case 'nav-roadmap': showRoadmap(); break;
+                case 'nav-stats': showStats(); break;
+                case 'nav-notebook': showNotebook(); break;
+                case 'nav-pomodoro': showPomodoro(); break;
+                case 'nav-journal': showJournal(); break;
+                case 'nav-leaderboard': showLeaderboard(); break;
+                case 'nav-store': showStore(); break;
+                case 'nav-friends': switchToScreen('friends-screen'); renderFriends(); break;
+                case 'nav-profile': showProfile(); break;
+                case 'nav-settings': 
+                    switchToScreen('settings-screen');
+                    document.querySelector('.settings-nav-item[data-settings-tab="general"]')?.click();
+                    break;
+                default: switchToScreen(item.screenId);
+            }
+        }
+    }
+};
+
+function updateMenuSettingsList() {
+    const list = document.getElementById('menu-customization-list');
+    const countDisplay = document.getElementById('menu-selected-count');
+    if (!list || !countDisplay) return;
+    
+    countDisplay.textContent = state.visibleMenuItems.length;
+    
+    list.innerHTML = MENU_ITEMS_LIST.map(item => {
+        const isChecked = state.visibleMenuItems.includes(item.id);
+        const isDisabled = !isChecked && state.visibleMenuItems.length >= 10;
+        
+        return `
+            <div class="settings-item-modern ${isDisabled ? 'disabled' : ''}">
+                <div class="item-info">
+                    <span class="item-title">${item.icon} ${item.label}</span>
+                </div>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="toggle-${item.id}" ${isChecked ? 'checked' : ''} 
+                           onchange="toggleMenuItem('${item.id}')" ${isDisabled ? 'disabled' : ''}>
+                    <label for="toggle-${item.id}"></label>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.toggleMenuItem = (id) => {
+    const index = state.visibleMenuItems.indexOf(id);
+    if (index > -1) {
+        // Remove
+        state.visibleMenuItems.splice(index, 1);
+    } else {
+        // Add (max 10)
+        if (state.visibleMenuItems.length < 10) {
+            state.visibleMenuItems.push(id);
+        } else {
+            showMascotMessage("Bạn chỉ được chọn tối đa 10 mục thôi nhé! 🐿️⚠️", 2000);
+        }
+    }
+    
+    saveProgress();
+    renderSidebar();
+    updateMenuSettingsList();
+};
+
+async function handleAIExplanation() {
+    const q = state.currentQuestions[state.questionIndex];
+    if (!q) return;
+
+    const btn = document.getElementById('btn-ask-ai-explanation');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> Đang giải mã...';
+    btn.disabled = true;
+
+    try {
+        const explanation = await getDetailedExplanation(q.q, q.answer, state.currentGrade, state.currentSubject);
+        showMascotMessage(explanation, 10000); // 10 seconds for reading
+        
+        // Also save to notebook if it's really good
+        if (confirm("Gợi ý này hay quá! Sóc lưu vào sổ tay cho bạn nhé?")) {
+            saveToNotebook(q.q, explanation, state.currentSubject);
+        }
+    } catch (e) {
+        showMascotMessage("Opps, Sóc đang bận một chút. Bạn thử lại nhé! 🐿️");
+    } finally {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+}
+
+function saveToNotebook(title, content, category) {
+    const item = {
+        id: Date.now(),
+        title: title.length > 50 ? title.substring(0, 50) + '...' : title,
+        content: content,
+        category: category,
+        date: new Date().toLocaleDateString('vi-VN')
+    };
+    state.notebook.unshift(item); // Add to top
+    saveProgress();
+    showMascotMessage("Đã lưu vào sổ tay thông thái! 📒🐿️", 2000);
+}
+window.saveToNotebook = saveToNotebook;
+
+function showNotebook() {
+    renderNotebook('all');
+    switchToScreen('notebook-screen');
+}
+
+function renderNotebook(filter = 'all') {
+    const grid = document.getElementById('notebook-grid');
+    const emptyView = document.getElementById('notebook-empty');
+    if (!grid || !emptyView) return;
+
+    let items = state.notebook;
+    if (filter !== 'all') {
+        items = items.filter(i => i.category === filter);
+    }
+
+    if (items.length === 0) {
+        grid.style.display = 'none';
+        emptyView.style.display = 'flex';
+    } else {
+        grid.style.display = 'grid';
+        emptyView.style.display = 'none';
+        
+        grid.innerHTML = items.map(item => `
+            <div class="nb-card ${item.category}">
+                <button class="btn-remove-nb" onclick="removeFromNotebook(${item.id})">✕</button>
+                <div class="nb-card-title">${item.title}</div>
+                <div class="nb-card-content">${item.content}</div>
+                <span class="nb-card-date">📅 ${item.date}</span>
+            </div>
+        `).join('');
+    }
+}
+
+function removeFromNotebook(id) {
+    if (confirm("Bạn muốn bỏ kiến thức này khỏi sổ tay?")) {
+        state.notebook = state.notebook.filter(i => i.id !== id);
+        saveProgress();
+        renderNotebook();
+    }
+}
+window.removeFromNotebook = removeFromNotebook;
+
+// Pomodoro Logic
+function showPomodoro() {
+    switchToScreen('pomodoro-screen');
+    updatePomoUI();
+}
+
+function togglePomodoro() {
+    if (state.pomodoro.isRunning) {
+        pausePomodoro();
+    } else {
+        startPomodoro();
+    }
+}
+
+function startPomodoro() {
+    state.pomodoro.isRunning = true;
+    const btn = document.getElementById('pomo-toggle');
+    if (btn) {
+        btn.textContent = 'Tạm dừng ⏸️';
+        btn.classList.add('active');
+    }
+
+    state.pomodoro.timer = setInterval(() => {
+        state.pomodoro.timeLeft--;
+        updatePomoUI();
+
+        if (state.pomodoro.timeLeft <= 0) {
+            clearInterval(state.pomodoro.timer);
+            state.pomodoro.isRunning = false;
+            
+            const isWork = state.pomodoro.activeMode === 25;
+            const msg = isWork ? "Tuyệt vời! Bạn đã hoàn thành một phiên tập trung. Nghỉ ngơi xíu nhé! 🐿️☕" : "Hết giờ nghỉ rồi, bắt đầu học thôi nào! 🚀";
+            showMascotMessage(msg, 5000);
+            
+            if (isWork) {
+                state.xp += 50;
+                state.coins += 10;
+                saveProgress();
+                updateUI();
+            }
+
+            resetPomodoro();
+        }
+    }, 1000);
+}
+
+function pausePomodoro() {
+    state.pomodoro.isRunning = false;
+    clearInterval(state.pomodoro.timer);
+    const btn = document.getElementById('pomo-toggle');
+    if (btn) {
+        btn.textContent = 'Tiếp tục 🚀';
+        btn.classList.remove('active');
+    }
+}
+
+function resetPomodoro() {
+    pausePomodoro();
+    state.pomodoro.timeLeft = state.pomodoro.activeMode * 60;
+    updatePomoUI();
+    const btn = document.getElementById('pomo-toggle');
+    if (btn) btn.textContent = 'Bắt đầu ngay 🚀';
+}
+
+function updatePomoUI() {
+    const timeDisplay = document.getElementById('pomo-time');
+    const ring = document.getElementById('pomo-progress-ring');
+    if (!timeDisplay || !ring) return;
+
+    const mins = Math.floor(state.pomodoro.timeLeft / 60);
+    const secs = state.pomodoro.timeLeft % 60;
+    timeDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    const total = state.pomodoro.activeMode * 60;
+    const offset = 628 - (628 * state.pomodoro.timeLeft / total);
+    ring.style.strokeDashoffset = offset;
+}
+
+// Journal Logic
+function showJournal() {
+    renderJournal();
+    switchToScreen('journal-screen');
+}
+
+function renderJournal() {
+    const list = document.getElementById('journal-list');
+    if (!list) return;
+
+    if (state.journal.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <p>Chưa có nhật ký nào. Hãy bắt đầu học tập để Sóc ghi chép lại nhé!</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = state.journal.map(entry => `
+        <div class="journal-entry">
+            <span class="journal-date">${entry.date}</span>
+            <div class="journal-summary">${entry.summary}</div>
+            <div class="journal-stats">
+                <div class="j-stat-item"><span>🚀</span> ${entry.xp} XP</div>
+                <div class="j-stat-item"><span>🪙</span> ${entry.coins} Coins</div>
+                <div class="j-stat-item"><span>📚</span> ${entry.lessons} bài học</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function addJournalEntry(lessonsCount, xpGained, coinsGained) {
+    const dateStr = new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // Check if entry for today already exists to update or just add new
+    const existingIndex = state.journal.findIndex(e => e.date === dateStr);
+    
+    let summary = "";
+    try {
+        const prompt = `Bạn là Sóc Ham Học. Hãy viết 1 câu tóm tắt ngắn gọn (tối đa 20 từ) và khích lệ về việc học sinh đã hoàn thành ${lessonsCount} bài học hôm nay. Sử dụng emoji.`;
+        const response = await askSmartSquirrel(prompt);
+        summary = response;
+    } catch(e) {
+        summary = `Hôm nay bạn thật tuyệt vời khi hoàn thành ${lessonsCount} bài học! Tiếp tục phát huy nhé! 🐿️🌟`;
+    }
+
+    if (existingIndex > -1) {
+        state.journal[existingIndex].lessons += lessonsCount;
+        state.journal[existingIndex].xp += xpGained;
+        state.journal[existingIndex].coins += coinsGained;
+        state.journal[existingIndex].summary = summary;
+    } else {
+        state.journal.unshift({
+            date: dateStr,
+            summary: summary,
+            lessons: lessonsCount,
+            xp: xpGained,
+            coins: coinsGained
+        });
+    }
+    
+    saveProgress();
+}

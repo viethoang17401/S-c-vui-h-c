@@ -56,3 +56,26 @@ export async function getHintOrEncouragement(context) {
     return "Cố lên nào, Sóc tin bạn làm được! 🐿️✨";
   }
 }
+
+export async function getDetailedExplanation(question, answer, grade, subject) {
+  try {
+    const prompt = `Học sinh lớp ${grade} đang học môn ${subject === 'math' ? 'Toán' : 'Tiếng Anh'}.
+Câu hỏi: ${question}
+Đáp án đúng: ${answer}
+
+Hãy giải thích chi tiết tại sao đáp án đó là đúng bằng ngôn ngữ dễ hiểu, thân thiện theo phong cách "Sóc Ham Học". Tối đa 80 từ. Sử dụng emoji.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+        temperature: 0.6,
+      }
+    });
+    return response.text;
+  } catch (error) {
+    console.error("AI Explanation Error:", error);
+    return "Sóc xin lỗi, mình chưa tìm thấy lời giải ngay lúc này. Bạn thử suy luận thêm chút nữa nhé! 🐿️🔍";
+  }
+}
